@@ -12,6 +12,17 @@ afterAll(() => {
     return db.end();
 })
 
+describe('Route does not exist', () => {
+    test('GET 404 responds with error message "Path not found!"', () => {
+        return request(app)
+        .get('/api/notAValidPath')
+        .expect(404)
+        .then(({ body }) => {
+            expect(body.msg).toBe('Path not found!');
+        })
+    })
+})
+
 describe('GET /api/topics', () => {
     test('GET 200 sends an array of topic objects with properties - slug and description', () => {
         return request(app)
@@ -24,5 +35,5 @@ describe('GET /api/topics', () => {
                 expect(typeof topic.description).toBe('string');
             })
         })
-    });
+    })
 })

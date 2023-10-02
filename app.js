@@ -1,24 +1,14 @@
 const express = require('express')
 
-const app = express()
-
 const { getTopics } = require('./controllers/topics.controller')
 
-const { 
-    handleCustomErrors, 
-    handlePsqlErrors, 
-    handleServerErrors
-    } = require('./errors/index.js')
-
-
+const app = express()
 app.use(express.json())
 
 app.get('/api/topics', getTopics);
 
-app.use(handleCustomErrors);
-
-app.use(handlePsqlErrors);
-
-app.use(handleServerErrors);
+app.all('/api/*', (req, res, next) => {
+    res.status(404).send({ msg: 'Path not found!'})
+})
 
 module.exports = app;
