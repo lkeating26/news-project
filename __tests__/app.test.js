@@ -50,7 +50,7 @@ describe('GET /api', () => {
     })
 })
 describe('GET /api/articles/:article_id', () => {
-    test('GET 200 sends an article object with the passed article_id with correct properties and values', () => {
+    test.only('GET 200 sends an article object with the passed article_id with correct properties and values', () => {
         return request(app)
         .get('/api/articles/2')
         .expect(200)
