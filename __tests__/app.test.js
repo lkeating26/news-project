@@ -3,6 +3,8 @@ const seed = require('../db/seeds/seed.js')
 const app = require('../app.js')
 const data = require('../db/data/test-data/index.js')
 const request = require('supertest')
+const endpoints = require('../endpoints.json')
+
 
 beforeEach(() => {
     return seed(data);
@@ -34,6 +36,16 @@ describe('GET /api/topics', () => {
                 expect(typeof topic.slug).toBe('string');
                 expect(typeof topic.description).toBe('string');
             })
+        })
+    })
+})
+describe('GET /api', () => {
+    test('GET 200 sends an object with properties of the available api endpoints', () => {
+        return request(app)
+        .get('/api')
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.endpoints).toEqual(endpoints)
         })
     })
 })
