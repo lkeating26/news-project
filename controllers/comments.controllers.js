@@ -7,7 +7,6 @@ const postComment = (req, res, next) => {
         return res.status(422).send({msg: 'Please provide username and body'})
     }
     createComment(newComment, article_id).then((comment) => {
-        console.log(comment)
         res.status(201).send({ comment })
     })
     .catch((err) => {
