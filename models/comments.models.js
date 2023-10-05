@@ -12,7 +12,6 @@ const createComment = (newComment, article_id) => {
         RETURNING *;`, 
         [newComment.body, article_id, newComment.username])
         .then(({ rows }) => {
-            console.log(rows[0])
             return rows[0];
         })
 }
