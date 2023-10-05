@@ -130,12 +130,7 @@ describe('GET /api/articles/:article_id/comments', () => {
         .then(({ body }) => {
             expect(body.comments).toHaveLength(11);
             body.comments.forEach((comment) => {
-                expect(comment.article_id).toBe(1);
-                expect(typeof comment.comment_id).toBe('number');
-                expect(typeof comment.votes).toBe('number');
-                expect(typeof comment.created_at).toBe('string');
-                expect(typeof comment.author).toBe('string');
-                expect(typeof comment.body).toBe('string');
+                expect(comment).toMatchObject({ article_id: 1, comment_id: expect.any(Number), votes: expect.any(Number), created_at: expect.any(String), author: expect.any(String), body: expect.any(String) })
             })
         })
     })
