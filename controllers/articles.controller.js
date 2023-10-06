@@ -27,7 +27,6 @@ const patchArticle = (req, res, next) => {
     }
 
     updateArticle(article_id, inc_votes).then((article) => {
-        console.log(article)
         res.status(200).send({article});
     })
     .catch((err) => {
