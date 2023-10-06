@@ -117,7 +117,7 @@ describe('GET /api/articles/:article_id', () => {
         .get('/api/articles/99999999')
         .expect(404)
         .then(({ body }) => {
-            expect(body.msg).toBe('id not found')
+            expect(body.msg).toBe('Article_id not found!')
         })
     })
 })
@@ -235,7 +235,7 @@ describe('GET /api/articles/:article_id/comments', () => {
         .get('/api/articles/notvalidid/comments')
         .expect(400)
         .then(({ body }) => {
-            expect(body.msg).toBe('invalid id')
+            expect(body.msg).toBe('bad request')
         })
     })
     test('GET 404 sends an error message when passed a valid id but does not exist', () => {
