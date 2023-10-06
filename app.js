@@ -2,9 +2,8 @@ const express = require('express')
 
 const { getTopics } = require('./controllers/topics.controller')
 const { getApis } = require('./controllers/api.controllers')
-const { getArticles, getArticleById } = require('./controllers/articles.controller')
-const { postComment } = require('./controllers/comments.controllers')
-const { getComments } = require('./controllers/comments.controllers')
+const { getArticles, getArticleById, patchArticle } = require('./controllers/articles.controller')
+const { postComment, getComments } = require('./controllers/comments.controllers')
 const { handlePsqlErrors, handleCustomErrors } = require('./errors/index')
 
 const app = express()
@@ -22,6 +21,8 @@ app.get('/api/articles/:article_id/comments', getComments);
 app.get('/api', getApis);
 
 app.post('/api/articles/:article_id/comments', postComment);
+
+app.patch('/api/articles/:article_id', patchArticle);
 
 app.use(handlePsqlErrors);
 

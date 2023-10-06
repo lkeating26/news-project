@@ -247,3 +247,89 @@ describe('GET /api/articles/:article_id/comments', () => {
         })
     })
 })
+
+describe('PATCH /api/articles/:article_id', () => {
+    test('PATCH 200 send the updated article object with votes property incremented inc_votes value', () => {
+        const vote = {
+            inc_votes: 1
+        }
+        return request(app)
+        .patch('/api/articles/2')
+        .send(vote)
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.article).toMatchObject({article_id: 2, votes: 1})
+        })
+    })
+    test('PATCH 200 send the updated article object with votes property decremented inc_votes value', () => {
+        const vote = {
+            inc_votes: -100
+        }
+        return request(app)
+        .patch('/api/articles/3')
+        .send(vote)
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.article).toMatchObject({article_id: 3, votes: -100})
+        })
+    })
+    test('PATCH 200 send the updated article object with votes property updated if value is string', () => {
+        const voteString = {
+            inc_votes: '5',
+        }
+        return request(app)
+        .patch('/api/articles/4')
+        .send(voteString)
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.article).toMatchObject({article_id: 4, votes: 5})
+        })
+    })
+
+    test('PATCH 404 sends an error message when article_id not found in articles table', () => {
+        const vote = {
+            inc_votes: 1
+        }
+        return request(app)
+        .patch('/api/articles/9999999')
+        .send(vote)
+        .expect(404)
+        .then(({ body }) => {
+            expect(body.msg).toBe('Article_id not found!')
+        })
+    })
+    test('PATCH 400 sends an error message when missing required field', () => {
+        const missingIncVote = {}
+        return request(app)
+        .patch('/api/articles/1')
+        .send(missingIncVote)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe('Please provide inc_votes')
+        })
+    })
+    test('PATCH 400 sends an error message when missing required field', () => {
+        const wrongVoteField = {
+            wrongField: 1,
+        }
+        return request(app)
+        .patch('/api/articles/1')
+        .send(wrongVoteField)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe('Please provide inc_votes')
+        })
+    })
+    test('PATCH 400 sends an error message when inc_votes value is a string letter not a number', () => {
+        const voteStringLetter = {
+            inc_votes: 'notanumber',
+        }
+        return request(app)
+        .patch('/api/articles/1')
+        .send(voteStringLetter)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe('bad request')
+        })
+    })
+})
