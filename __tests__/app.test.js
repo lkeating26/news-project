@@ -109,7 +109,7 @@ describe('GET /api/articles/:article_id', () => {
         .get('/api/articles/notvalidid')
         .expect(400)
         .then(({ body }) => {
-            expect(body.msg).toBe('invalid id')
+            expect(body.msg).toBe('bad request')
         })
     })
     test('GET 404 sends an error message when passed a valid id but does not exist', () => {
@@ -117,7 +117,82 @@ describe('GET /api/articles/:article_id', () => {
         .get('/api/articles/99999999')
         .expect(404)
         .then(({ body }) => {
-            expect(body.msg).toBe('Article_id not found!')
+            expect(body.msg).toBe('id not found')
+        })
+    })
+})
+
+describe('POST /api/articles/:article_id/comments', () => {
+    test('POST 201 sends the posted comment and has the next sequential comment_id', () => {
+        const newComment = {
+            username: "rogersop",
+            body: "new comment",
+        }
+        const postedComment = {
+            comment_id: 19,
+            author: "rogersop",
+            article_id: 1,
+            body: "new comment",
+            votes: 0,
+            created_at: expect.any(String)
+        }
+        return request(app)
+        .post('/api/articles/1/comments')
+        .send(newComment)
+        .expect(201)
+        .then(({ body }) => {
+            expect(body.comment).toMatchObject(postedComment)
+        })
+    })
+    test('POST 404 sends an error message when article_id not found in articles table', () => {
+        const newComment = {
+            username: "rogersop",
+            body: "new comment",
+        }
+        return request(app)
+        .post('/api/articles/999999/comments')
+        .send(newComment)
+        .expect(404)
+        .then(({ body }) => {
+            expect(body.msg).toBe('not found')
+        })
+    })
+    test('POST 404 sends an error message when username not found in users table', () => {
+        const newComment = {
+            username: "not user",
+            body: "new comment",
+        }
+        return request(app)
+        .post('/api/articles/1/comments')
+        .send(newComment)
+        .expect(404)
+        .then(({ body }) => {
+            expect(body.msg).toBe('not found')
+        })
+    })
+    test('POST 400 sends an error message when missing required fields', () => {
+        const missingUsername = {
+            body:"missing username",
+        }
+        return request(app)
+        .post('/api/articles/1/comments')
+        .send(missingUsername)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe('Please provide username and body')
+        })
+    })
+    test('POST 400 sends an error message when fields are incorrect', () => {
+        const incorrectFields = {
+            user: "should be username",
+            comment: "should be body"
+        }
+        return request(app)
+        .post('/api/articles/1/comments')
+        .send(incorrectFields)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe('Please provide username and body')
         })
     })
 })
