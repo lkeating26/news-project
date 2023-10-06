@@ -117,9 +117,58 @@ describe('GET /api/articles/:article_id', () => {
         .get('/api/articles/99999999')
         .expect(404)
         .then(({ body }) => {
-            expect(body.msg).toBe('Not found')
+            expect(body.msg).toBe('Article_id not found!')
         })
     })
 })
-
-
+describe('GET /api/articles/:article_id/comments', () => {
+    test('GET 200 sends an array of comment objects for the passed article_id with correct properties', () => {
+        return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.comments).toHaveLength(11);
+            body.comments.forEach((comment) => {
+                expect(comment).toMatchObject({ 
+                    article_id: 1, 
+                    comment_id: expect.any(Number), 
+                    votes: expect.any(Number), 
+                    created_at: expect.any(String), 
+                    author: expect.any(String), 
+                    body: expect.any(String) 
+                })
+            })
+        })
+    })
+    test('comment objects should be ordered with most recent first', () => {
+        return request(app)
+        .get('/api/articles/1/comments')
+        .then(({ body }) => {
+            expect(body.comments).toBeSortedBy('created_at', { descending: true })
+        })
+    })
+    test('GET 200 sends an empty array for article that exists but has no comments', () => {
+        return request(app)
+        .get('/api/articles/13/comments')
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.comments).toEqual([])
+        })
+    }) 
+    test('GET 400 sends an error message when passed an invalid article_id', () => {
+        return request(app)
+        .get('/api/articles/notvalidid/comments')
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe('invalid id')
+        })
+    })
+    test('GET 404 sends an error message when passed a valid id but does not exist', () => {
+        return request(app)
+        .get('/api/articles/99999999/comments')
+        .expect(404)
+        .then(({ body }) => {
+            expect(body.msg).toBe('Article_id not found!')
+        })
+    })
+})
