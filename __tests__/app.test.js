@@ -170,19 +170,19 @@ describe('POST /api/articles/:article_id/comments', () => {
             expect(body.msg).toBe('not found')
         })
     })
-    test('POST 422 sends an error message when missing required fields', () => {
+    test('POST 400 sends an error message when missing required fields', () => {
         const missingUsername = {
             body:"missing username",
         }
         return request(app)
         .post('/api/articles/1/comments')
         .send(missingUsername)
-        .expect(422)
+        .expect(400)
         .then(({ body }) => {
             expect(body.msg).toBe('Please provide username and body')
         })
     })
-    test('POST 422 sends an error message when fields are incorrect', () => {
+    test('POST 400 sends an error message when fields are incorrect', () => {
         const incorrectFields = {
             user: "should be username",
             comment: "should be body"
@@ -190,7 +190,7 @@ describe('POST /api/articles/:article_id/comments', () => {
         return request(app)
         .post('/api/articles/1/comments')
         .send(incorrectFields)
-        .expect(422)
+        .expect(400)
         .then(({ body }) => {
             expect(body.msg).toBe('Please provide username and body')
         })
