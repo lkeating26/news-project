@@ -1,4 +1,4 @@
-const { createComment } = require('../models/comments.models')
+const { createComment, selectComments } = require('../models/comments.models')
 
 const postComment = (req, res, next) => {
     const { article_id } = req.params;
@@ -12,6 +12,17 @@ const postComment = (req, res, next) => {
     .catch((err) => {
         next(err)
     })
+}     
+
+const getComments = (req, res, next) => {
+    const { article_id } = req.params;
+    
+    selectComments(article_id).then((comments) => {
+        res.status(200).send({ comments })
+    })
+    .catch((err) => {
+        next(err)
+    })
 }
 
 
@@ -20,4 +31,4 @@ const postComment = (req, res, next) => {
 
 
 
-module.exports = { postComment }
+module.exports = { postComment, getComments }
