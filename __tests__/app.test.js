@@ -148,14 +148,14 @@ describe('GET /api/articles/:article_id/comments', () => {
             expect(body.comments).toBeSortedBy('created_at', { descending: true })
         })
     })
-    // test('GET 200 sends an empty array for article that exists but has no comments', () => {
-    //     return request(app)
-    //     .get('/api/articles/13/comments')
-    //     .expect(200)
-    //     .then(({ body }) => {
-    //         expect(body.comments).toEqual([])
-    //     })
-    // }) 
+    test('GET 200 sends an empty array for article that exists but has no comments', () => {
+        return request(app)
+        .get('/api/articles/13/comments')
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.comments).toEqual([])
+        })
+    }) 
     test('GET 400 sends an error message when passed an invalid article_id', () => {
         return request(app)
         .get('/api/articles/notvalidid/comments')
@@ -168,9 +168,9 @@ describe('GET /api/articles/:article_id/comments', () => {
         return request(app)
         .get('/api/articles/99999999/comments')
         .expect(404)
-        // .then(({ body }) => {
-        //     expect(body.msg).toBe('Article_id not found!')
-        // })
+        .then(({ body }) => {
+            expect(body.msg).toBe('Article_id not found!')
+        })
     })
 })
 
