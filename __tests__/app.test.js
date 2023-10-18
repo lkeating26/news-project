@@ -247,3 +247,48 @@ describe('GET /api/articles/:article_id/comments', () => {
         })
     })
 })
+
+describe('DELETE /api/comments/:comment_id', () => {
+    test('DELETE 204 deletes the comment with passed comment_id but returns no content', () => {
+        return request(app)
+        .delete('/api/comments/1')
+        .expect(204)
+        .then(({ body }) => {
+            expect(body).toEqual({})
+        })
+    })
+    test('DELETE 400 sends an error message when passed an invalid comment_id', () => {
+        return request(app)
+        .delete('/api/comments/notvalidid')
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe('bad request')
+        })
+    })
+    test('DELETE 404 sends an error message when passed a valid id but does not exist', () => {
+        return request(app)
+        .delete('/api/comments/9999999')
+        .expect(404)
+        .then(({ body }) => {
+            expect(body.msg).toBe('Comment_id not found!')
+        })
+    })
+})
+
+describe('GET /api/users', () => {
+    test('GET 200 sends an array of user objects with correct properties', () => {
+        return request(app)
+        .get('/api/users')
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.users).toHaveLength(4);
+            body.users.forEach((user) => {
+                expect(user).toMatchObject({ 
+                    username: expect.any(String),
+                    name: expect.any(String),
+                    avatar_url: expect.any(String),
+                })
+            })
+        })
+    })
+})
