@@ -86,5 +86,22 @@
         "comment_count": 6
       }
     }
+  },
+  "DELETE /api/comments/:comment_id": {
+    "description": "deletes a comment for comment_id parameter",
+    "queries": [],
+    "exampleResponse": {}
+  },
+  "GET /api/users": {
+    "description": "serves an array of all user objects",
+    "queries": [],
+    "exampleResponse": {
+      "users": [
+        { "username": "icellusedkars",
+          "name": "Sam", 
+          "avatar_url": "https://avatars2.com....." 
+        }
+      ]
+    }
   }
 }
