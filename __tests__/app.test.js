@@ -109,7 +109,7 @@ describe('GET /api/articles/:article_id', () => {
         .get('/api/articles/notvalidid')
         .expect(400)
         .then(({ body }) => {
-            expect(body.msg).toBe('invalid id')
+            expect(body.msg).toBe('bad request')
         })
     })
     test('GET 404 sends an error message when passed a valid id but does not exist', () => {
@@ -122,6 +122,80 @@ describe('GET /api/articles/:article_id', () => {
     })
 })
 
+describe('POST /api/articles/:article_id/comments', () => {
+    test('POST 201 sends the posted comment and has the next sequential comment_id', () => {
+        const newComment = {
+            username: "rogersop",
+            body: "new comment",
+        }
+        const postedComment = {
+            comment_id: 19,
+            author: "rogersop",
+            article_id: 1,
+            body: "new comment",
+            votes: 0,
+            created_at: expect.any(String)
+        }
+        return request(app)
+        .post('/api/articles/1/comments')
+        .send(newComment)
+        .expect(201)
+        .then(({ body }) => {
+            expect(body.comment).toMatchObject(postedComment)
+        })
+    })
+    test('POST 404 sends an error message when article_id not found in articles table', () => {
+        const newComment = {
+            username: "rogersop",
+            body: "new comment",
+        }
+        return request(app)
+        .post('/api/articles/999999/comments')
+        .send(newComment)
+        .expect(404)
+        .then(({ body }) => {
+            expect(body.msg).toBe('not found')
+        })
+    })
+    test('POST 404 sends an error message when username not found in users table', () => {
+        const newComment = {
+            username: "not user",
+            body: "new comment",
+        }
+        return request(app)
+        .post('/api/articles/1/comments')
+        .send(newComment)
+        .expect(404)
+        .then(({ body }) => {
+            expect(body.msg).toBe('not found')
+        })
+    })
+    test('POST 400 sends an error message when missing required fields', () => {
+        const missingUsername = {
+            body:"missing username",
+        }
+        return request(app)
+        .post('/api/articles/1/comments')
+        .send(missingUsername)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe('Please provide username and body')
+        })
+    })
+    test('POST 400 sends an error message when fields are incorrect', () => {
+        const incorrectFields = {
+            user: "should be username",
+            comment: "should be body"
+        }
+        return request(app)
+        .post('/api/articles/1/comments')
+        .send(incorrectFields)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe('Please provide username and body')
+        })
+    })
+})
 describe('GET /api/articles/:article_id/comments', () => {
     test('GET 200 sends an array of comment objects for the passed article_id with correct properties', () => {
         return request(app)
@@ -161,7 +235,7 @@ describe('GET /api/articles/:article_id/comments', () => {
         .get('/api/articles/notvalidid/comments')
         .expect(400)
         .then(({ body }) => {
-            expect(body.msg).toBe('invalid id')
+            expect(body.msg).toBe('bad request')
         })
     })
     test('GET 404 sends an error message when passed a valid id but does not exist', () => {
@@ -174,4 +248,134 @@ describe('GET /api/articles/:article_id/comments', () => {
     })
 })
 
+describe('PATCH /api/articles/:article_id', () => {
+    test('PATCH 200 send the updated article object with votes property incremented inc_votes value', () => {
+        const vote = {
+            inc_votes: 1
+        }
+        return request(app)
+        .patch('/api/articles/2')
+        .send(vote)
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.article).toMatchObject({article_id: 2, votes: 1})
+        })
+    })
+    test('PATCH 200 send the updated article object with votes property decremented inc_votes value', () => {
+        const vote = {
+            inc_votes: -100
+        }
+        return request(app)
+        .patch('/api/articles/3')
+        .send(vote)
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.article).toMatchObject({article_id: 3, votes: -100})
+        })
+    })
+    test('PATCH 200 send the updated article object with votes property updated if value is string', () => {
+        const voteString = {
+            inc_votes: '5',
+        }
+        return request(app)
+        .patch('/api/articles/4')
+        .send(voteString)
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.article).toMatchObject({article_id: 4, votes: 5})
+        })
+    })
 
+    test('PATCH 404 sends an error message when article_id not found in articles table', () => {
+        const vote = {
+            inc_votes: 1
+        }
+        return request(app)
+        .patch('/api/articles/9999999')
+        .send(vote)
+        .expect(404)
+        .then(({ body }) => {
+            expect(body.msg).toBe('Article_id not found!')
+        })
+    })
+    test('PATCH 400 sends an error message when missing required field', () => {
+        const missingIncVote = {}
+        return request(app)
+        .patch('/api/articles/1')
+        .send(missingIncVote)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe('Please provide inc_votes')
+        })
+    })
+    test('PATCH 400 sends an error message when missing required field', () => {
+        const wrongVoteField = {
+            wrongField: 1,
+        }
+        return request(app)
+        .patch('/api/articles/1')
+        .send(wrongVoteField)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe('Please provide inc_votes')
+        })
+    })
+    test('PATCH 400 sends an error message when inc_votes value is a string letter not a number', () => {
+        const voteStringLetter = {
+            inc_votes: 'notanumber',
+        }
+        return request(app)
+        .patch('/api/articles/1')
+        .send(voteStringLetter)
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe('bad request')
+        })
+    })
+})
+
+
+describe('DELETE /api/comments/:comment_id', () => {
+    test('DELETE 204 deletes the comment with passed comment_id but returns no content', () => {
+        return request(app)
+        .delete('/api/comments/1')
+        .expect(204)
+        .then(({ body }) => {
+            expect(body).toEqual({})
+        })
+    })
+    test('DELETE 400 sends an error message when passed an invalid comment_id', () => {
+        return request(app)
+        .delete('/api/comments/notvalidid')
+        .expect(400)
+        .then(({ body }) => {
+            expect(body.msg).toBe('bad request')
+        })
+    })
+    test('DELETE 404 sends an error message when passed a valid id but does not exist', () => {
+        return request(app)
+        .delete('/api/comments/9999999')
+        .expect(404)
+        .then(({ body }) => {
+            expect(body.msg).toBe('Comment_id not found!')
+        })
+    })
+})
+
+describe('GET /api/users', () => {
+    test('GET 200 sends an array of user objects with correct properties', () => {
+        return request(app)
+        .get('/api/users')
+        .expect(200)
+        .then(({ body }) => {
+            expect(body.users).toHaveLength(4);
+            body.users.forEach((user) => {
+                expect(user).toMatchObject({ 
+                    username: expect.any(String),
+                    name: expect.any(String),
+                    avatar_url: expect.any(String),
+                })
+            })
+        })
+    })
+})
