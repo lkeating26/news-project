@@ -15,7 +15,6 @@ const selectArticles = ({
     "comment_count",
   ];
   const validOrder = ["asc", "desc"];
-  console.log(topic);
 
   if (!validSortBy.includes(sort_by)) {
     return Promise.reject({ status: 400, msg: "Invalid sort_by query" });
@@ -46,7 +45,6 @@ const selectArticles = ({
 
   queryStr += `GROUP BY articles.article_id 
                 ORDER BY ${sort_by} ${order};`;
-  console.log(queryStr, queryValues);
 
   return db.query(queryStr, queryValues).then(({ rows }) => {
     if (rows.length === 0) {

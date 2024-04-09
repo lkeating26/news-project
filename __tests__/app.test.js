@@ -31,7 +31,6 @@ describe("GET /api", () => {
       .get("/api")
       .expect(200)
       .then(({ body }) => {
-        console.log(endpoints);
         expect(body.endpoints).toEqual(endpoints);
       });
   });
@@ -308,7 +307,7 @@ describe("GET /api/articles/:article_id/comments", () => {
 });
 
 describe("PATCH /api/articles/:article_id", () => {
-  test("PATCH 200 send the updated article object with votes property incremented inc_votes value", () => {
+  test("PATCH 200 send the updated article object with votes properly incremented inc_votes value", () => {
     const vote = {
       inc_votes: 1,
     };
@@ -320,7 +319,7 @@ describe("PATCH /api/articles/:article_id", () => {
         expect(body.article).toMatchObject({ article_id: 2, votes: 1 });
       });
   });
-  test("PATCH 200 send the updated article object with votes property decremented inc_votes value", () => {
+  test("PATCH 200 send the updated article object with votes properly decremented inc_votes value", () => {
     const vote = {
       inc_votes: -100,
     };
@@ -434,6 +433,91 @@ describe("GET /api/users", () => {
             avatar_url: expect.any(String),
           });
         });
+      });
+  });
+});
+describe("GET /api/users/:username", () => {
+  test("GET 200 sends a user object with the passed username with correct properties", () => {
+    return request(app)
+      .get("/api/users/rogersop")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.user).toMatchObject({
+          username: "rogersop",
+          name: "paul",
+          avatar_url:
+            "https://avatars2.githubusercontent.com/u/24394918?s=400&v=4",
+        });
+      });
+  });
+  test("GET 404 sends an error message when passed a valid username but does not exist", () => {
+    return request(app)
+      .get("/api/users/notvaliduser")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Username not found!");
+      });
+  });
+});
+
+describe("PATCH /api/comments/:comment_id", () => {
+  test("PATCH 200 send the updated comment object with votes properly incremented inc_votes value", () => {
+    const vote = {
+      inc_votes: 1,
+    };
+    return request(app)
+      .patch("/api/comments/5")
+      .send(vote)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comment).toMatchObject({ comment_id: 5, votes: 1 });
+      });
+  });
+  test("PATCH 200 send the updated comment object with votes properly decremented inc_votes value", () => {
+    const vote = {
+      inc_votes: -100,
+    };
+    return request(app)
+      .patch("/api/comments/5")
+      .send(vote)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comment).toMatchObject({ comment_id: 5, votes: -100 });
+      });
+  });
+  test("PATCH 200 send the updated comment object with votes property updated if value is string", () => {
+    const voteString = {
+      inc_votes: "5",
+    };
+    return request(app)
+      .patch("/api/comments/10")
+      .send(voteString)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comment).toMatchObject({ comment_id: 10, votes: 5 });
+      });
+  });
+
+  test("PATCH 404 sends an error message when comment_id not found in comments table", () => {
+    const vote = {
+      inc_votes: 1,
+    };
+    return request(app)
+      .patch("/api/comments/9999999")
+      .send(vote)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Comment_id not found!");
+      });
+  });
+  test("PATCH 400 sends an error message when missing required field", () => {
+    const missingIncVote = {};
+    return request(app)
+      .patch("/api/comments/1")
+      .send(missingIncVote)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Please provide inc_votes");
       });
   });
 });
