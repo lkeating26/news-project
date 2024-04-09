@@ -130,6 +130,7 @@ describe("GET /api/articles/:article_id", () => {
         expect(body.article).toHaveProperty("article_img_url");
       });
   });
+
   test("GET 200 sends an article object with the passed article_id with correct number of comments", () => {
     return request(app)
       .get("/api/articles/5")

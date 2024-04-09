@@ -11,7 +11,12 @@
   },
   "GET /api/articles": {
     "description": "serves an array of all articles with number of comments for each",
-    "queries": [],
+    "queries": [
+      {
+        "name": "topic",
+        "description": "Optional. Filters the articles by the provided topic name."
+      }
+    ],
     "exampleResponse": {
       "articles": [
         {
@@ -97,9 +102,10 @@
     "queries": [],
     "exampleResponse": {
       "users": [
-        { "username": "icellusedkars",
-          "name": "Sam", 
-          "avatar_url": "https://avatars2.com....." 
+        {
+          "username": "icellusedkars",
+          "name": "Sam",
+          "avatar_url": "https://avatars2.com....."
         }
       ]
     }
