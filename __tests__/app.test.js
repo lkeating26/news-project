@@ -104,12 +104,36 @@ describe("GET /api/articles", () => {
         expect(body.articles[0].topic).toBe("cats");
       });
   });
+  test("article objects should be ordered by sort_by query when passed a valid sort_by query", () => {
+    return request(app)
+      .get("/api/articles?sort_by=votes")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toBeSortedBy("votes", { descending: true });
+      });
+  });
   test("GET 404 sends an error message when passed a valid topic query but does not exist", () => {
     return request(app)
       .get("/api/articles?topic=notopic")
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("Topic not found!");
+      });
+  });
+  test("GET 400 sends an error message when passed an invalid sort_by column", () => {
+    return request(app)
+      .get("/api/articles?sort_by=not_valid")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid sort_by query");
+      });
+  });
+  test("GET 400 sends an error message when passed an invalid order direction", () => {
+    return request(app)
+      .get("/api/articles?order=not_valid")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid order query");
       });
   });
 });
