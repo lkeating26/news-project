@@ -521,3 +521,105 @@ describe("PATCH /api/comments/:comment_id", () => {
       });
   });
 });
+describe("POST /api/articles", () => {
+  test("POST 201 sends the posted article and has the next sequential article_id", () => {
+    const newArticle = {
+      author: "butter_bridge",
+      title: "new article",
+      body: "new article body",
+      topic: "mitch",
+      article_img_url: "https://image.com",
+    };
+    const postedArticle = {
+      article_id: 14,
+      title: "new article",
+      topic: "mitch",
+      author: "butter_bridge",
+      body: "new article body",
+      votes: 0,
+      created_at: expect.any(String),
+      comment_count: 0,
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.article).toMatchObject(postedArticle);
+      });
+  });
+  test("POST 201 sends the posted article and has the default article_img_url if not provided", () => {
+    const newArticle = {
+      author: "butter_bridge",
+      title: "new article",
+      body: "new article body",
+      topic: "mitch",
+    };
+    const defaultImg =
+      "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700";
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.article.article_img_url).toBe(defaultImg);
+      });
+  });
+  test("POST 404 sends an error message when username not found in users table", () => {
+    const newArticle = {
+      author: "not user",
+      title: "new article",
+      body: "new article body",
+      topic: "mitch",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("not found");
+      });
+  });
+  test("POST 404 sends an error message when topic not found in topics table", () => {
+    const newArticle = {
+      author: "butter_bridge",
+      title: "new article",
+      body: "new article body",
+      topic: "notopic",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("not found");
+      });
+  });
+  test("POST 400 sends an error message when missing required fields", () => {
+    const missingTitle = {
+      author: "butter_bridge",
+      body: "missing title",
+      topic: "mitch",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(missingTitle)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Please provide title, body, topic and author");
+      });
+  });
+  test("POST 400 sends an error message when fields are incorrect", () => {
+    const incorrectFields = {
+      user: "should be author",
+      comment: "should be body",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(incorrectFields)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Please provide title, body, topic and author");
+      });
+  });
+});

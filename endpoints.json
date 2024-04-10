@@ -142,5 +142,21 @@
         "created_at": "2020-03-02T07:10:00.000Z"
       }
     }
+  },
+  "POST /api/articles": {
+    "description": "adds to articles table and serves and respones with the posted article object",
+    "queries": [],
+    "exampleResponse": {
+      "article": {
+        "author": "weegembump",
+        "title": "Seafood substitutions are increasing",
+        "article_id": 1,
+        "topic": "cooking",
+        "created_at": "2018-05-30T15:59:13.341Z",
+        "article_img_url": "https://images.pexels.com.....",
+        "votes": 0,
+        "comment_count": 0
+      }
+    }
   }
 }

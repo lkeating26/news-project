@@ -1,7 +1,9 @@
+const { post } = require("../app");
 const {
   selectArticles,
   selectArticleById,
   updateArticle,
+  createArticle,
 } = require("../models/articles.models");
 
 const getArticles = (req, res, next) => {
@@ -43,4 +45,25 @@ const patchArticle = (req, res, next) => {
     });
 };
 
-module.exports = { getArticles, getArticleById, patchArticle };
+const postArticle = (req, res, next) => {
+  const newArticle = req.body;
+  if (
+    !newArticle.title ||
+    !newArticle.body ||
+    !newArticle.topic ||
+    !newArticle.author
+  ) {
+    return res
+      .status(400)
+      .send({ msg: "Please provide title, body, topic and author" });
+  }
+  createArticle(newArticle)
+    .then((article) => {
+      res.status(201).send({ article });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+module.exports = { getArticles, getArticleById, patchArticle, postArticle };

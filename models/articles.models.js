@@ -93,4 +93,31 @@ const updateArticle = (article_id, inc_votes) => {
     });
 };
 
-module.exports = { selectArticles, selectArticleById, updateArticle };
+const createArticle = ({ title, body, topic, author, article_img_url }) => {
+  const values = [title, body, topic, author];
+  let placeholders = `$1, $2, $3, $4`;
+
+  if (article_img_url) {
+    values.push(article_img_url);
+    placeholders += `, $5`;
+  } else {
+    placeholders += `, DEFAULT`;
+  }
+
+  const query = `
+  INSERT INTO articles (title, body, topic, author, article_img_url)
+  VALUES (${placeholders})
+  RETURNING *, 0 AS comment_count;`;
+
+  return db.query(query, values).then(({ rows }) => {
+    console.log(rows);
+    return rows[0];
+  });
+};
+
+module.exports = {
+  selectArticles,
+  selectArticleById,
+  updateArticle,
+  createArticle,
+};

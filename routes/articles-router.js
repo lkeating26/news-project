@@ -4,13 +4,14 @@ const {
   getArticles,
   getArticleById,
   patchArticle,
+  postArticle,
 } = require("../controllers/articles.controller");
 const {
   getComments,
   postComment,
 } = require("../controllers/comments.controllers");
 
-articleRouter.route("/").get(getArticles);
+articleRouter.route("/").get(getArticles).post(postArticle);
 
 articleRouter.route("/:article_id").get(getArticleById).patch(patchArticle);
 
