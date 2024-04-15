@@ -19,7 +19,8 @@ const createComment = (newComment, article_id) => {
     });
 };
 
-const selectComments = (article_id) => {
+const selectComments = ({ article_id, limit = 10, p = 1 }) => {
+  const offset = (p - 1) * limit;
   return selectArticleById(article_id)
     .then(() => {
       return db.query(
@@ -27,9 +28,10 @@ const selectComments = (article_id) => {
         SELECT *
         FROM comments
         WHERE article_id=$1
-        ORDER BY created_at DESC;
+        ORDER BY created_at DESC
+        LIMIT $2 OFFSET $3;
         `,
-        [article_id]
+        [article_id, limit, offset]
       );
     })
     .then((comments) => {

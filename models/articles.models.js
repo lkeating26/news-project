@@ -4,6 +4,8 @@ const selectArticles = ({
   topic,
   sort_by = "created_at",
   order = "desc",
+  limit = 10,
+  p = 1,
 } = {}) => {
   const validSortBy = [
     "author",
@@ -14,7 +16,10 @@ const selectArticles = ({
     "votes",
     "comment_count",
   ];
+
   const validOrder = ["asc", "desc"];
+
+  const offset = (p - 1) * limit;
 
   if (!validSortBy.includes(sort_by)) {
     return Promise.reject({ status: 400, msg: "Invalid sort_by query" });
@@ -22,6 +27,8 @@ const selectArticles = ({
   if (!validOrder.includes(order)) {
     return Promise.reject({ status: 400, msg: "Invalid order query" });
   }
+
+  const queryValues = [];
 
   let queryStr = `
     SELECT articles.author,
@@ -31,12 +38,11 @@ const selectArticles = ({
             articles.created_at,
             articles.votes,         
             articles.article_img_url,
-            COUNT(comment_id)::int AS comment_count
+            COUNT(comment_id)::int AS comment_count,
+            COUNT(*) OVER()::int AS total_count
         FROM articles
         LEFT JOIN comments ON comments.article_id = articles.article_id
         `;
-
-  const queryValues = [];
 
   if (topic) {
     queryValues.push(topic);
@@ -44,7 +50,12 @@ const selectArticles = ({
   }
 
   queryStr += `GROUP BY articles.article_id 
-                ORDER BY ${sort_by} ${order};`;
+                ORDER BY ${sort_by} ${order}
+                LIMIT $${queryValues.length + 1} OFFSET $${
+    queryValues.length + 2
+  };`;
+
+  queryValues.push(limit, offset);
 
   return db.query(queryStr, queryValues).then(({ rows }) => {
     if (rows.length === 0) {
@@ -110,7 +121,6 @@ const createArticle = ({ title, body, topic, author, article_img_url }) => {
   RETURNING *, 0 AS comment_count;`;
 
   return db.query(query, values).then(({ rows }) => {
-    console.log(rows);
     return rows[0];
   });
 };

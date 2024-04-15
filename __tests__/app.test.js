@@ -4,6 +4,7 @@ const app = require("../app.js");
 const data = require("../db/data/test-data/index.js");
 const request = require("supertest");
 const endpoints = require("../endpoints.json");
+const e = require("express");
 require("jest-sorted");
 
 beforeEach(() => {
@@ -52,12 +53,13 @@ describe("GET /api/topics", () => {
 });
 
 describe("GET /api/articles", () => {
-  test("GET 200 sends an array of article objects with correct properties", () => {
+  test("GET 200 sends an array of article objects with correct properties and limited to 10 articles returned", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
       .then(({ body }) => {
-        expect(body.articles).toHaveLength(13);
+        expect(body.articles).toHaveLength(10);
+
         body.articles.forEach((article) => {
           expect(typeof article.article_id).toBe("number");
           expect(typeof article.title).toBe("string");
@@ -67,6 +69,7 @@ describe("GET /api/articles", () => {
           expect(typeof article.votes).toBe("number");
           expect(typeof article.article_img_url).toBe("string");
           expect(typeof article.comment_count).toBe("number");
+          expect(article.total_count).toBe(13);
         });
       });
   });
@@ -133,6 +136,16 @@ describe("GET /api/articles", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Invalid order query");
+      });
+  });
+  test("should paginate the response with a limit and page number", () => {
+    const limit = 5;
+    const page = 3;
+    return request(app)
+      .get(`/api/articles?limit=${limit}&p=${page}`)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toHaveLength(3);
       });
   });
 });
@@ -260,7 +273,7 @@ describe("GET /api/articles/:article_id/comments", () => {
       .get("/api/articles/1/comments")
       .expect(200)
       .then(({ body }) => {
-        expect(body.comments).toHaveLength(11);
+        expect(body.comments).toHaveLength(10);
         body.comments.forEach((comment) => {
           expect(comment).toMatchObject({
             article_id: 1,
@@ -302,6 +315,16 @@ describe("GET /api/articles/:article_id/comments", () => {
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("Article_id not found!");
+      });
+  });
+  test("should paginate the response with a limit and page number", () => {
+    const limit = 5;
+    const page = 3;
+    return request(app)
+      .get(`/api/articles/1/comments?limit=${limit}&p=${page}`)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comments).toHaveLength(1);
       });
   });
 });
@@ -620,6 +643,75 @@ describe("POST /api/articles", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Please provide title, body, topic and author");
+      });
+  });
+});
+describe("POST /api/topics", () => {
+  test("POST 201 creates a topic in db and returns it", () => {
+    const newTopic = {
+      slug: "newslug",
+      description: "new description",
+    };
+    const postedTopic = {
+      slug: "newslug",
+      description: "new description",
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(newTopic)
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.topic).toMatchObject(postedTopic);
+      });
+  });
+  test("POST 400 sends an error message when missing required fields", () => {
+    const missingSlug = {
+      description: "missing slug",
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(missingSlug)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Please provide slug and description");
+      });
+  });
+  test("POST 400 sends an error message when missing required fields", () => {
+    const missingDescription = {
+      slug: "missing description",
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(missingDescription)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Please provide slug and description");
+      });
+  });
+  test("POST 400 sends an error message when fields are incorrect", () => {
+    const incorrectFields = {
+      slug: "should be slug",
+      comment: "should be description",
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(incorrectFields)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Please provide slug and description");
+      });
+  });
+  test("POST 400 sends an error message when topic already exists", () => {
+    const existingTopic = {
+      slug: "cats",
+      description: "new description",
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(existingTopic)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Topic already exists");
       });
   });
 });
